@@ -1,9 +1,11 @@
 import express, { Request, Response, NextFunction } from 'express'
 import { authenticationMiddleware } from '../middleware/authentication-middleware'
-import { getAllUsers, getUserById, saveOneUser } from '../daos/user-dao'
+import { getAllUsers, getUserById, saveOneUser, patchUser } from '../daos/user-dao'
 import { authorizationMiddleware } from '../middleware/authorization-middleware'
 import { UserUserInputError } from '../errors/UserUserInputError'
 import { User } from '../models/User'
+//import { BadCredentialsError } from '../errors/BadCredentialsError'
+import {AuthFailureError} from '../errors/AuthFailureError'
 
 //prints from DB
 //base path is /users
@@ -12,9 +14,8 @@ export const userRouter = express.Router()
 // this applies this middleware to the entire router beneath it
 userRouter.use(authenticationMiddleware)
 
-
 // Get all
-userRouter.get('/', authorizationMiddleware(['finance manager']), async (req: Request, res: Response, next: NextFunction) => 
+userRouter.get('/', authorizationMiddleware(['finance manager', 'users', 'admin']), async (req: Request, res: Response, next: NextFunction) => 
 {
     try {
         let allUsers = await getAllUsers()//thinking in abstraction
@@ -28,7 +29,7 @@ userRouter.get('/', authorizationMiddleware(['finance manager']), async (req: Re
 
 
 //Get by id
-userRouter.get('/:id', authorizationMiddleware(['finance manager']), async (req: Request, res: Response, next: NextFunction) =>
+userRouter.get('/:id', authorizationMiddleware(['finance manager', 'user']), async (req: Request, res: Response, next: NextFunction) =>
 {
     let { id } = req.params
     if (isNaN(+id)) 
@@ -36,8 +37,10 @@ userRouter.get('/:id', authorizationMiddleware(['finance manager']), async (req:
         
         res.status(400).send('Id must be a number')
     } 
-    else 
-    {
+    else if(req.session.user.role === "user" && req.session.user.userId !== +id){
+        next(new AuthFailureError);
+    }
+    else{
         try 
         {
             let user = await getUserById(+id)
@@ -49,6 +52,55 @@ userRouter.get('/:id', authorizationMiddleware(['finance manager']), async (req:
         }
     }
 })
+//update user
+userRouter.patch('/', authorizationMiddleware(['admin']), async (req:Request, res:Response, next:NextFunction) =>
+{
+    let { userId,
+        username,
+        password,
+        firstName,
+        lastName,
+        email,
+        role } = req.body
+        if(!userId) 
+        { 
+            res.status(400).send('Please enter userId and update a field')
+        }
+        else if(isNaN(+userId)) { 
+            res.status(400).send('Id needs to be a number')
+        }
+        else {
+            let updatedUser:User = {
+                userId,
+                username,
+                password,
+                firstName,
+                lastName,
+                email,
+                role
+            }
+            updatedUser.username = username || undefined
+            updatedUser.password = password || undefined
+            updatedUser.firstName = firstName || undefined
+            updatedUser.lastName = lastName || undefined
+            updatedUser.email = email || undefined
+            updatedUser.role = role || undefined
+            try {
+                let result = await patchUser(updatedUser)
+                res.json(result)
+            } catch (e) {
+                next(e)
+            }
+        }
+    }) 
+
+
+
+
+
+
+
+
 
 //Save new
 userRouter.post('/', authorizationMiddleware(['finance manager']), async (req: Request, res: Response, next: NextFunction) => 
@@ -77,7 +129,8 @@ userRouter.post('/', authorizationMiddleware(['finance manager']), async (req: R
         try 
         {
             let savedUser = await saveOneUser(newUser)
-            res.json(savedUser)// needs to have the updated userId
+            res.json(savedUser)
+            // needs to have the updated userId
         } 
         catch (e) 
         {

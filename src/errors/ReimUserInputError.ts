@@ -3,6 +3,6 @@ export class ReimUserInputError extends HttpError
 {
     constructor()
     {
-        super(400, 'Please Fill Out All Reimbursement Fields')
+        super(400, 'Please Fill Out All Reimbursement Fields :( ')
     }
 }

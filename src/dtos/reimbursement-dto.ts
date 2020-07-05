@@ -9,5 +9,7 @@ export class ReimbursementDTO
     description: string
     resolver:number
     status: number
+    //status_id:number
     type: number
+    //type_id:number
 }

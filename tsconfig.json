@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-      "types": ["node", "jest"],
+      "types": ["node"],
       "outDir": "build/dist",
       "module": "commonjs",
       "target": "es5",

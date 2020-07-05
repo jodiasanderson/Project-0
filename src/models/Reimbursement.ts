@@ -1,12 +1,15 @@
+//import { ReimbursementStatus } from "./ReimbursementStatus"
+//import { ReimbursementType } from "./ReimbursementType"
+
 export class Reimbursement
 {
     reimbursementId: number 
     author: number 
     amount: number  
-    dateSubmitted: number 
-    dateResolved: number 
+    dateSubmitted: Date
+    dateResolved: Date 
     description: string 
     resolver: number 
-    statusId: number 
-    typeId: number 
+    status: number
+    type: number
   }

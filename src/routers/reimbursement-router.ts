@@ -1,58 +1,28 @@
 import express, { Request, Response, NextFunction} from 'express'
-//import { ReimUserInputError } from '../errors/ReimUserInputError'
-//import { ReimIdInputError } from '../errors/ReimIdInputError'
-//import { ReimNotFoundError } from '../errors/ReimNotFoundError'
-import { getAllReim, findbyStatus,updateReimbursementInfo, findbyUser, submitReimbursement } from '../daos/reimbursement-dao'
+import { getAllReim, findbyStatus,  findbyUser, submitReimbursement, updateReimbursementInfo } from '../daos/reimbursement-dao'
 import { ReimIdInputError } from '../errors/ReimIdInputError'
-//import { Reimbursement } from 'src/models/Reimbursement'
-//import {authorizationMiddleware} from '../middleware/authorization-middleware'
 import { Reimbursement } from '../models/Reimbursement'
 import { ReimUserInputError } from '../errors/ReimUserInputError'
+import { authorizationMiddleware } from '../middleware/authorization-middleware'
 
-
-//prints from DB
 export let reimbursementRouter = express.Router()
 
-//Get all rem
+//GET all reimbursements
 reimbursementRouter.get('/', async(req:Request, res:Response,next: NextFunction)=> 
 {
     try
-{ 
+    { 
     let allReimbursement = await getAllReim()
     res.json(allReimbursement) 
-} 
-catch (e) 
-{
+    } 
+    catch (e) 
+    {
     next(e)
-}
+    }
 })
 
-
-//save rem
-reimbursementRouter.post('/s', (req:Request, res:Response, next: NextFunction)=>
-{   
-    console.log(req.body);
-    let {reimbursementId, 
-        author,
-        amount,  
-        dateSubmitted, 
-        dateResolved, 
-        description, 
-        resolver,
-        status } = req.body
-        if(reimbursementId && author && amount && dateSubmitted &&
-            dateResolved &&description && resolver && status)
-        {
-            res.sendStatus(201)  //created
-        }
-        else
-        {
-           throw new  ReimUserInputError()
-        }
-})
-
-
-reimbursementRouter.get('/status/:id',async (req:Request, res:Response,next:NextFunction )=> //destructuring
+//GET reimbursements statusID
+reimbursementRouter.get('/status/:id', authorizationMiddleware(['finance manager']),async (req:Request, res:Response,next:NextFunction )=> 
 {
     let{id} = req.params
     if(isNaN(+id))
@@ -73,7 +43,8 @@ reimbursementRouter.get('/status/:id',async (req:Request, res:Response,next:Next
     }
 })
 
-reimbursementRouter.get('/author/userId/:userId',async (req:Request, res:Response,next:NextFunction )=> //destructuring
+//GET reimbursements by author & userId
+reimbursementRouter.get('/author/userId/:userId', authorizationMiddleware(['finance manager']),async (req:Request, res:Response,next:NextFunction )=> //destructuring
 {
     let{userId} = req.params
     if(isNaN(+userId))
@@ -94,8 +65,49 @@ reimbursementRouter.get('/author/userId/:userId',async (req:Request, res:Respons
     }
 })
 
-//Update Reim
-reimbursementRouter.patch('/',  async (req:Request, res:Response, next:NextFunction) => {
+
+//POST Submit Reimbursement
+reimbursementRouter.post('/',async (req:Request, res:Response, next:NextFunction) => 
+{
+    console.log(req.body);
+    let { amount, description, type, author } = req.body
+        //let author =req.session.userId ? kind of unecessary made !=undefined instead
+        //console.log(amount) check check....
+        //console.log(author) checking values
+    if(author!=undefined || amount!= undefined || description!= undefined||type!=undefined) 
+    {
+        let newReim: Reimbursement = 
+        {
+            reimbursementId: 0,
+            author,
+            amount,
+            dateSubmitted: new Date(),
+            dateResolved: new Date(),
+            description,
+            resolver: author,
+            status:1,    
+            type
+        }
+        newReim.type || null
+        try {
+            //console.log('checking...')
+                let savedReim = await submitReimbursement(newReim)
+                res.json(savedReim)
+            }
+         catch (e) 
+        {
+            next(e)
+        }
+    }
+    else 
+    {
+        throw new ReimUserInputError()
+    }
+
+})
+
+//PATCH Update Reimbursement
+reimbursementRouter.patch('/', authorizationMiddleware(['finance manager']), async (req:Request, res:Response, next:NextFunction) => {
     let { reimbursementId,
         author,
         amount,
@@ -105,16 +117,21 @@ reimbursementRouter.patch('/',  async (req:Request, res:Response, next:NextFunct
         resolver,
         status,
         type} = req.body
-    if(!reimbursementId) { //update request must contain a reimbursementId
-        res.status(400).send('Reimbursement Updates Require ReimbursementId and at Least One Other Field')
+        console.log(req.body)
+    if(reimbursementId == undefined) 
+    { 
+        res.status(400).send('Reimbursement updates require ID and another field')
     }
-    if(isNaN(+reimbursementId)) { //check if reimbursementId is valid
-        res.status(400).send('Id Needs to be a Number')
-    }
-    if  (status === "Approved" || status === "Denied")
+    if(isNaN(+reimbursementId)) 
+    { 
+        res.status(400).send('ID must be a number')
+    } 
+    console.log(status)
+    if  (status === "approved" || status === "denied")
     {
-
-        let updatedReimInfo:Reimbursement = { 
+           
+        let updatedReimInfo:Reimbursement = 
+        { 
             reimbursementId, 
             author,
             amount,
@@ -133,72 +150,44 @@ reimbursementRouter.patch('/',  async (req:Request, res:Response, next:NextFunct
         updatedReimInfo.resolver = resolver || undefined
         updatedReimInfo.status = status || undefined
         updatedReimInfo.type = type || undefined
-        try {
+        try 
+        {
             let results = await updateReimbursementInfo(updatedReimInfo)
             res.json(results)
-        } catch (e) {
+        } 
+        catch (e) 
+        {
             next(e)
         }
-    } else {
-        let updatedReimInfo: Reimbursement =
+        } 
+        else 
         {
-
-        reimbursementId,
+         let updatedReimInfo: Reimbursement =
+        {
+            reimbursementId,
             author,
             amount,
-            dateSubmitted: undefined,
-            dateResolved: null,
+            dateSubmitted: new Date(),
+            dateResolved: new Date(),
             description,
-            resolver: null,
-            status:3,
+            resolver,
+            status,
             type
         }
         updatedReimInfo.author = author || undefined
         updatedReimInfo.amount = amount || undefined
         updatedReimInfo.description = description || undefined      
         updatedReimInfo.status = status || undefined
-        updatedReimInfo.type = type || undefined
-
-        try {
+        updatedReimInfo.type = type || undefined   
+        try 
+        {
+            console.log('checking req body...')
             let updatedReimbursementResults = await updateReimbursementInfo(updatedReimInfo)
             res.json(updatedReimbursementResults)
-        } catch (e) {
+        }
+         catch (e) 
+        {
             next(e)
         }
     }
-})
-
-//Submit/Save new
-reimbursementRouter.post('/',async (req:Request, res:Response, next:NextFunction) => {
-    console.log(req.body);
-    let { amount, description, type, author } = req.body
-        //let author =req.session.userId
-        //console.log(amount)
-        //console.log(author)
-    if(author!=undefined || amount!= undefined || description!= undefined||type!=undefined) 
-    {
-        let newReim: Reimbursement = {
-            reimbursementId: 0,
-            author,
-            amount,
-            dateSubmitted: new Date(),
-            dateResolved: new Date(),
-            description,
-            resolver: author,
-            status:1,    
-            type
-        }
-        newReim.type || null
-        try {
-            //console.log('hi')
-                let savedReim = await submitReimbursement(newReim)
-            res.json(savedReim)
-        } catch (e) {
-            next(e)
-        }
-    }
-    else {
-        throw new ReimUserInputError()
-    }
-
 })

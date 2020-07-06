@@ -15,7 +15,7 @@ export const userRouter = express.Router()
 userRouter.use(authenticationMiddleware)
 
 // Get all
-userRouter.get('/', authorizationMiddleware(['finance manager', 'users', 'admin']), async (req: Request, res: Response, next: NextFunction) => 
+userRouter.get('/', authorizationMiddleware(['finance manager']), async (req: Request, res: Response, next: NextFunction) => 
 {
     try {
         let allUsers = await getAllUsers()//thinking in abstraction
@@ -29,7 +29,7 @@ userRouter.get('/', authorizationMiddleware(['finance manager', 'users', 'admin'
 
 
 //Get by id
-userRouter.get('/:id', authorizationMiddleware(['finance manager', 'user']), async (req: Request, res: Response, next: NextFunction) =>
+userRouter.get('/:id', authorizationMiddleware(['finance manager', 'user', 'admin']), async (req: Request, res: Response, next: NextFunction) =>
 {
     let { id } = req.params
     if (isNaN(+id)) 

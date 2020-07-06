@@ -152,7 +152,6 @@ export async function submitReimbursement(newReim:Reimbursement):Promise<Reimbur
     
 }
 
-
 export async function updateReimbursementInfo(updatedReimbursementInfo:Reimbursement):Promise<Reimbursement> {
     let client:PoolClient
     try {
@@ -191,7 +190,7 @@ export async function updateReimbursementInfo(updatedReimbursementInfo:Reimburse
         }
         if(updatedReimbursementInfo.status) {
             let statusId = await client.query(`select rs."status_id" from project0.reimbursementstatus rs 
-                                            where rs."status" = $1;`, [updatedReimbursementInfo.status, updatedReimbursementInfo.reimbursementId])
+                                            where rs."status_id" = $1;`, [updatedReimbursementInfo.status])
             if(statusId.rowCount === 0) {
                 throw new Error('Status Not Found')
             }
@@ -200,25 +199,28 @@ export async function updateReimbursementInfo(updatedReimbursementInfo:Reimburse
                                 where "reimbursement_id" = $2;`, 
                                 [statusId, updatedReimbursementInfo.reimbursementId])
         }
-        if(updatedReimbursementInfo.type) {
+        if(updatedReimbursementInfo.type) 
+        {
+            console.log(updatedReimbursementInfo.type)
             let typeId = await client.query(`select rt."type_id" from project0.reimbursementtype rt 
-                                            where rt."type" = $1;`, [updatedReimbursementInfo.type])
+                                            where rt."type_id" = $1;`, [updatedReimbursementInfo.type])
+                                            
             if(typeId.rowCount === 0) {
                 throw new Error('Type Not Found')
             }
-            typeId = typeId.rows[0].type_id
-            await client.query(`update project0.reimbursementtype set "type" = $1 
-                                where "reimbursement_id" = $2;`, 
-                                [typeId, updatedReimbursementInfo.reimbursementId])
+            // typeId = typeId.rows[0].type_id
+            // //await client.query(`update project0.reimbursementtype set "type" = $1 
+            //                     where "reimbursement_id" = $2;`, 
+             //                   [typeId, updatedReimbursementInfo.reimbursementId])
         }
 
         await client.query('COMMIT;')
         return updatedReimbursementInfo
     } catch(e) {
         client && client.query('ROLLBACK;')
-        if(e.message == 'Status Not Found' || e.message == 'Type Not Found') {
+       if(e.message == 'Status Not Found' || e.message == 'Type Not Found') {
             throw new Error('DAO side')
-        }
+       }
         console.log(e);
         throw new Error('Unhandled Error')
     } finally {

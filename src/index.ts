@@ -17,6 +17,9 @@ app.use(loginMiddleware) //custom MW to run on all req
 app.use(sessionMiddleware) //tracks connections
 app.use('/reimbursements', reimbursementRouter)
 app.use('/users', userRouter)// redirect all requests on /users to the router
+app.get('/health', (req:Request, res:Response)=> {
+    res.sendStatus(200)
+})
 
 
 //endpoint for credentials to recieve authentication always aysnc! awaiting value!
@@ -44,9 +47,9 @@ app.post('/login', async (req:Request, res:Response, next:NextFunction)=>
     }
 })
 
-//Error handler we wrote that express redirects top level errors to
+//Error handler that express redirects top level errors to
 app.use((err, req, res, next) => {
-    //if it is one of our custom errors
+    //if  custom errors
     if (err.statusCode) {
         // use the status code and the message for the response
         res.status(err.statusCode).send(err.message)

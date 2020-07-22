@@ -5,7 +5,7 @@ import {patchUser, deleteUser, saveOneUser } from '../daos/SQL/user-dao'
 //import { UserUserInputError } from '../errors/UserUserInputError'
 import { User } from '../models/User'
 //import { BadCredentialsError } from '../errors/BadCredentialsError'
-//import {AuthFailureError} from '../errors/AuthFailureError'
+import {AuthFailureError} from '../errors/AuthFailureError'
 import { getAllUsersService, getUserByIDService } from '../services/user-service'
 //saveOneUserService 
 
@@ -57,9 +57,9 @@ userRouter.get('/:id', async (req: Request, res: Response, next: NextFunction) =
         
         res.status(400).send('Id must be a number')
     } 
-    //else if(req.session.user.role === "user" && req.session.user.userId !== +id){
-        //next(new AuthFailureError);
-    
+    else if(req.session.user.role === "user" && req.session.user.userId !== +id){
+        next(new AuthFailureError);
+    }
     else{
         try 
         {
@@ -113,7 +113,6 @@ userRouter.patch('/', async (req:Request, res:Response, next:NextFunction) =>
             try {
                 let result = await patchUser(updatedUser)
                 res.json(result)
-                
             } catch (e) {
                 next(e)
             }
@@ -124,11 +123,11 @@ userRouter.patch('/', async (req:Request, res:Response, next:NextFunction) =>
 //Save new
 userRouter.post('/', async (req: Request, res: Response, next: NextFunction) => 
 {
-   let { username, password, firstName, lastName, email, image} = req.body//destructuring
-   //console.log(req.body)
+   //input from the user
+  console.log(req.body);
+   let { username, password, firstName, lastName, email, role, image} = req.body//destructuring
    //verify input
-   
-    if (username!=undefined && password!=undefined  || lastName!=undefined  || firstName!=undefined  || email!=undefined  || image!=undefined  ) {
+    if (username!=undefined && password!=undefined  || lastName!=undefined  || firstName!=undefined  || email!=undefined   || role==undefined) {
      //call to the dao/DB layer to try and save user
        let newUser: User = 
        {
@@ -136,7 +135,7 @@ userRouter.post('/', async (req: Request, res: Response, next: NextFunction) =>
            password,
            firstName,
            lastName,
-           role : '27',
+           role : 'user',
            userId: 0,
            email,
            image
@@ -145,10 +144,8 @@ userRouter.post('/', async (req: Request, res: Response, next: NextFunction) =>
        newUser.email = email || null
        try 
        {
-          //console.log(req.body)
            let savedUser = await saveOneUser(newUser)
            res.json(savedUser)
-           //console.log(savedUser)
            // needs to have the updated userId
        } 
        catch (e) 

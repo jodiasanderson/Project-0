@@ -6,7 +6,7 @@ import { UserNotFoundError } from "../../errors/UserNotFoundError";
 import { User } from "../../models/User";
 import { AuthFailureError} from '../../errors/AuthFailureError';
 import { UserUserInputError } from "../../errors/UserUserInputError";
-import {saveProfilePicture} from "../../daos/Cloud-Storage/user-images"
+
 //Get all users
 export async function getAllUsers():Promise<User[]> //<What we want to return as>
 {
@@ -121,29 +121,27 @@ export async function saveOneUser(newUser:User):Promise<User>
     {
         client = await connectionPool.connect()
         //multiple querys for a transaction
-        // await client.query('BEGIN;')//start transaction
-       
-        saveProfilePicture('image/jpeg',newUser.image, 'testj.jpg')
-        // let results = await client.query(`insert into project0.users ("username", "password", "firstName", "lastName", "email","role", "image")
-        //                                     values($1,$2,$3,$4,$5,$6,$7) returning "user_id" `,//returns some values from rows in an insert, update,delete
-        //                                     [newUser.username, newUser.password, newUser.firstName, newUser.lastName, newUser.email, newUser.image, newUser.role])
-        // newUser.userId = results.rows[0].user_id
-        // await client.query('COMMIT;')//ends transaction
-        // let contentType=[]
-        // contentType =newUser.image.split['at'];
-        // console.log(contentType)
-       // contentType =contentType[1].split[',']
-      //  console.log(contentType[0])
-       
+        await client.query('BEGIN;')//start transaction
+        //let roleId = await client.query(`select r."role_id" from project0.roles r where r."role" = $1`, [newUser.role])
+
+        let roleId = await client.query(`select r."role_id" from project0.roles r where r."role" = $1`, [newUser.role])
+        if(roleId.rowCount === 0){
+            throw new Error('Role Not Found')
+        }
+        roleId = roleId.rows[0].role_id
+        let results = await client.query(`insert into project0.users ("username", "password", "firstName", "lastName", "email","role", "image")
+                                            values($1,$2,$3,$4,$5,$6,$7) returning "user_id" `,//returns some values from rows in an insert, update,delete
+                                            [newUser.username, newUser.password, newUser.firstName, newUser.lastName, newUser.email, newUser.image, roleId])
+        newUser.userId = results.rows[0].user_id
+        await client.query('COMMIT;')//ends transaction
         return newUser
-        
     }
     catch(e)
     {
         client && client.query('ROLLBACK;')//if this is a js error undo the sql
         if(e.message === 'Role Not Found')
         {
-           throw new UserUserInputError()
+            throw new UserUserInputError()
         }
         console.log(e)
         throw new Error('Unhandled Error Occured')
@@ -197,19 +195,19 @@ export async function patchUser(patchUser:User):Promise<User>
                                 where "user_id" = $2;`, 
                                 [patchUser.image, patchUser.userId])
         }
-        // if(patchUser.role) 
-        // {
-        //     let roleId = await client.query(`select r."role_id" from project0.roles r 
-        //                         where r."role" = $1`,[patchUser.role])
+        if(patchUser.role) 
+        {
+            let roleId = await client.query(`select r."role_id" from project0.roles r 
+                                where r."role" = $1`,[patchUser.role])
                                 
-        // if(roleId.rowCount === 0) 
-        // {
-        //     throw new Error('Role Not Found')
-        // }
-        //     roleId = roleId.rows[0].role_id
-        //     await client.query(`update project0.users set "role" = $1 
-        //                         where "user_id" = $2;`, [roleId, patchUser.userId])
-        // }
+        if(roleId.rowCount === 0) 
+        {
+            throw new Error('Role Not Found')
+        }
+            roleId = roleId.rows[0].role_id
+            await client.query(`update project0.users set "role" = $1 
+                                where "user_id" = $2;`, [roleId, patchUser.userId])
+        }
         await client.query('COMMIT;')
         return patchUser   
     } 

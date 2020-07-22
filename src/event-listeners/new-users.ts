@@ -6,7 +6,7 @@ import { userTopic } from "../messaging";
 
 
 expressEventEmitter.on(customExpressEvents.NEW_USER, (newUser:User)=>{
-
+console.log('run')
     setImmediate(async ()=>{
         try{
             let res = await userTopic.publishJSON(newUser)

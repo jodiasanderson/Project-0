@@ -9,7 +9,7 @@ import { getUserByUsernameAndPassword } from './daos/SQL/user-dao'
 import { corsFilter } from './middleware/cors-filter'
 import './messaging/index'
 import { userTopic } from './messaging/index'
-
+import './event-listeners/new-users'
 
 
 console.log(userTopic)

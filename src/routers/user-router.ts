@@ -1,24 +1,44 @@
 import express, { Request, Response, NextFunction } from 'express'
-import { authenticationMiddleware } from '../middleware/authentication-middleware'
-import { getAllUsers, getUserById, saveOneUser, patchUser } from '../daos/user-dao'
-import { authorizationMiddleware } from '../middleware/authorization-middleware'
-import { UserUserInputError } from '../errors/UserUserInputError'
+//import { authenticationMiddleware } from '../middleware/authentication-middleware'
+import {patchUser, deleteUser, saveOneUser } from '../daos/SQL/user-dao'
+//import { authorizationMiddleware } from '../middleware/authorization-middleware'
+//import { UserUserInputError } from '../errors/UserUserInputError'
 import { User } from '../models/User'
 //import { BadCredentialsError } from '../errors/BadCredentialsError'
-import {AuthFailureError} from '../errors/AuthFailureError'
+//import {AuthFailureError} from '../errors/AuthFailureError'
+import { getAllUsersService, getUserByIDService } from '../services/user-service'
+//saveOneUserService 
 
 //prints from DB
 //base path is /users
 export const userRouter = express.Router()
 
 // this applies this middleware to the entire router beneath it
-userRouter.use(authenticationMiddleware)
+//userRouter.use(authenticationMiddleware)
+
 
 // Get all
-userRouter.get('/', authorizationMiddleware(['finance manager']), async (req: Request, res: Response, next: NextFunction) => 
+userRouter.get('/logout', function(req:any, res:any){
+    //req.logout();
+    delete req.user
+
+    res.redirect('Log out sucessful');
+  });
+
+userRouter.get('/logout2',(req,res) => {
+    
+    req.session.destroy((err) => {
+        if(err) {
+            return console.log(err);
+        }
+        res.redirect('/');
+    });
+
+});
+userRouter.get('/', async (req: Request, res: Response, next: NextFunction) => 
 {
     try {
-        let allUsers = await getAllUsers()//thinking in abstraction
+        let allUsers = await getAllUsersService()//thinking in abstraction
         res.json(allUsers)
     } 
     catch (e) 
@@ -29,7 +49,7 @@ userRouter.get('/', authorizationMiddleware(['finance manager']), async (req: Re
 
 
 //Get by id
-userRouter.get('/:id', authorizationMiddleware(['finance manager', 'user', 'admin']), async (req: Request, res: Response, next: NextFunction) =>
+userRouter.get('/:id', async (req: Request, res: Response, next: NextFunction) =>
 {
     let { id } = req.params
     if (isNaN(+id)) 
@@ -37,13 +57,13 @@ userRouter.get('/:id', authorizationMiddleware(['finance manager', 'user', 'admi
         
         res.status(400).send('Id must be a number')
     } 
-    else if(req.session.user.role === "user" && req.session.user.userId !== +id){
-        next(new AuthFailureError);
-    }
+    //else if(req.session.user.role === "user" && req.session.user.userId !== +id){
+        //next(new AuthFailureError);
+    
     else{
         try 
         {
-            let user = await getUserById(+id)
+            let user = await getUserByIDService(+id)
             res.json(user)
         } 
         catch (e) 
@@ -52,9 +72,11 @@ userRouter.get('/:id', authorizationMiddleware(['finance manager', 'user', 'admi
         }
     }
 })
-//update user
-userRouter.patch('/', authorizationMiddleware(['admin']), async (req:Request, res:Response, next:NextFunction) =>
+//update user had admin can see and update user change to user can see and update info 
+//users
+userRouter.patch('/', async (req:Request, res:Response, next:NextFunction) =>
 {
+     //let { id } = req.params
     let { userId,
         username,
         password,
@@ -69,6 +91,9 @@ userRouter.patch('/', authorizationMiddleware(['admin']), async (req:Request, re
         else if(isNaN(+userId)) { 
             res.status(400).send('Id needs to be a number')
         }
+        //else if(req.session.user.role === "user" && req.session.user.userId !== +id){
+            //next(new AuthFailureError);
+        //}
         else {
             let updatedUser:User = {
                 userId,
@@ -88,6 +113,7 @@ userRouter.patch('/', authorizationMiddleware(['admin']), async (req:Request, re
             try {
                 let result = await patchUser(updatedUser)
                 res.json(result)
+                
             } catch (e) {
                 next(e)
             }
@@ -95,51 +121,68 @@ userRouter.patch('/', authorizationMiddleware(['admin']), async (req:Request, re
     }) 
 
 
-
-
-
-
-
-
-
 //Save new
-userRouter.post('/', authorizationMiddleware(['finance manager']), async (req: Request, res: Response, next: NextFunction) => 
+userRouter.post('/', async (req: Request, res: Response, next: NextFunction) => 
 {
-    //input from the user
-    let { username, password, firstName, lastName, email, role } = req.body//destructuring
-    //verify input
-    if (!username || !password || !role) 
-    {
-        next(new UserUserInputError)
-    } 
-    else 
-    {
-        //call to the dao/DB layer to try and save user
-        let newUser: User = 
-        {
-            username,
-            password,
-            firstName,
-            lastName,
-            role,
-            userId: 0,
-            email,
-        }
-        newUser.email = email || null
-        try 
-        {
-            let savedUser = await saveOneUser(newUser)
-            res.json(savedUser)
-            // needs to have the updated userId
-        } 
-        catch (e) 
-        {
-            next(e)
-        }
+   let { username, password, firstName, lastName, email, image} = req.body//destructuring
+   //console.log(req.body)
+   //verify input
+   
+    if (username!=undefined && password!=undefined  || lastName!=undefined  || firstName!=undefined  || email!=undefined  || image!=undefined  ) {
+     //call to the dao/DB layer to try and save user
+       let newUser: User = 
+       {
+           username,
+           password,
+           firstName,
+           lastName,
+           role : '27',
+           userId: 0,
+           email,
+           image
+       }
+     
+       newUser.email = email || null
+       try 
+       {
+          //console.log(req.body)
+           let savedUser = await saveOneUser(newUser)
+           res.json(savedUser)
+           //console.log(savedUser)
+           // needs to have the updated userId
+       } 
+       catch (e) 
+       {
+           next(e)
+       }
     }
+    
 })
 
-//Patch user?
+userRouter.delete('/', async (req: Request, res: Response, next: NextFunction) => {
+    let { userId } = req.body
 
-//Delete user?
+    if((userId = Number && userId))  {  
+    let deletedUser: User = {
+        
+        username: '',
+        password: '',
+        firstName: '',
+        lastName: '',
+        role : 'User',
+        userId:0,
+        email: '',
+        
+    }
+    
+    try {
+        await deleteUser(deletedUser)
+        res.send('Sad to see you go :(. Account sucessfully deleted')
 
+    } catch (e) {
+        next(e)
+    }
+}else if ((!userId)) {
+    res.status(400).send('Please include id to delete account')
+}
+})

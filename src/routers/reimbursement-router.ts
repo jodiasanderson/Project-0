@@ -1,5 +1,5 @@
 import express, { Request, Response, NextFunction} from 'express'
-import { getAllReim, findbyStatus,  findbyUser, submitReimbursement, updateReimbursementInfo } from '../daos/reimbursement-dao'
+import { getAllReim, findbyStatus,  findbyUser, submitReimbursement, updateReimbursementInfo } from '../daos/SQL/reimbursement-dao'
 import { ReimIdInputError } from '../errors/ReimIdInputError'
 import { Reimbursement } from '../models/Reimbursement'
 import { ReimUserInputError } from '../errors/ReimUserInputError'

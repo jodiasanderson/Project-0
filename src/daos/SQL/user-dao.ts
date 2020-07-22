@@ -195,19 +195,7 @@ export async function patchUser(patchUser:User):Promise<User>
                                 where "user_id" = $2;`, 
                                 [patchUser.image, patchUser.userId])
         }
-        if(patchUser.role) 
-        {
-            let roleId = await client.query(`select r."role_id" from project0.roles r 
-                                where r."role" = $1`,[patchUser.role])
-                                
-        if(roleId.rowCount === 0) 
-        {
-            throw new Error('Role Not Found')
-        }
-            roleId = roleId.rows[0].role_id
-            await client.query(`update project0.users set "role" = $1 
-                                where "user_id" = $2;`, [roleId, patchUser.userId])
-        }
+       
         await client.query('COMMIT;')
         return patchUser   
     } 

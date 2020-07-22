@@ -22,22 +22,17 @@ export async function saveOneUserService(newUser: User): Promise<User> {
     try {
         let base64Image = newUser.image
         let [dataType, imageBase64Data] = base64Image.split(';base64,')// gets us the two important parts of the base 64 string
-         //we need to make sure picture is in the right format
         let contentType = dataType.split('/').pop()// split our string that looks like data:image/ext into ['data:image' , 'ext]
-        //then the pop method gets us the last thing in the array
-        //we need to add the picture path to the user data in the sql database
+        
         if (newUser.image) {
             newUser.image = `${bucketBaseUrl}/users/${newUser.username}/profile.${contentType}`
         }
         //we need to save new user data to the sql database
         let savedUser = await saveOneUser(newUser)
 
-        //we need to save a picture to cloud storage 
-       
-        //we should probably make sure that username has no spaces in it or that we replace them with -
+        
         await saveProfilePicture(contentType, imageBase64Data, `users/${newUser.username}/profile.${contentType}`)
-        //with event driven design after I completed the save a user process
-        //I send an event saying tis done with the relevent info
+        
         //expressEventEmitter.emit(customExpressEvents.NEW_USER, newUser)
         return savedUser
     } catch (e) {

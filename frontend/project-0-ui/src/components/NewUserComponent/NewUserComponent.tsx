@@ -51,7 +51,6 @@ export const NewUserComponent: FunctionComponent<any> = (props) => {
     let [lastName, changeLastName] = useState('')
     let [firstName, changeFirstName] = useState('')
     let [password, changePassword] = useState('')
-    //let [role, changeRole] = useState('')
     let [confirmPassword, changeConfirmPassword] = useState('')
     let [email, changeEmail] = useState('')
     const [image, changeImage] = useState<any>(undefined) //''||  null || undefined
@@ -110,7 +109,7 @@ export const NewUserComponent: FunctionComponent<any> = (props) => {
                 lastName, 
                 password,
                 email,
-                role:'User',
+                role:'user',
                 image
             }
     
@@ -136,7 +135,6 @@ export const NewUserComponent: FunctionComponent<any> = (props) => {
                     <TextField id="standard-basic" label="Firstname" value={firstName} onChange={updatefirstName} />
                     <TextField id="standard-basic" label="Lastname" value={lastName} onChange={updatelastName} />
                     <TextField id="standard-basic" type='email' label="email" value={email} onChange={updateEmail}/> 
-                    <label htmlFor='file'>Profile Picture: </label>
                     <input type='file' name='file' accept='image/*' onChange={updateImage}/>
                     <img src={image}/>
                     <Button className={classes.submit} type='submit' variant="contained" color="secondary">REGISTER</Button>

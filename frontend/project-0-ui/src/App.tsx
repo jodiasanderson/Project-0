@@ -38,11 +38,11 @@ function App() {
 
         {/* this is how you use a component in react
           just like any other html tag */}
-        <Route path='/clicker'>
+        <Route path='/welcome'>
           {/* With route, we can supply the component to render as a child */}
-          <FancyBorder>
+         
             <ClickerComponent user={currentUser}/>
-          </FancyBorder>
+          
         </Route>
         <Route path='/title' render={(props) => (
           // we are making an anonymous react component using the render field

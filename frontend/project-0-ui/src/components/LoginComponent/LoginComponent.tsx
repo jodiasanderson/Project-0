@@ -67,7 +67,7 @@ export const LoginComponent:FunctionComponent<ILoginProps> = (props) => {
         let res = await projectLogin(username, password)
         props.changeCurrentUser(res)
         changePassword('')
-        props.history.push('/clicker') //change path upon login here! USEFUL TO SEE AND EDIT PROFILE INFO
+        props.history.push('/welcome') //change path upon login here! USEFUL TO SEE AND EDIT PROFILE INFO
     }
 
     

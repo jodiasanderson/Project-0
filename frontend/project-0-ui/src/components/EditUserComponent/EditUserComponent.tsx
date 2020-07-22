@@ -53,7 +53,7 @@ export const EditUserComponent: FunctionComponent<any> = (props) => {
     const [password, changePassword] = useState('')
     const [confirmPassword, changeConfirmPassword] = useState('')
     const [email, changeEmail] = useState('')
-    //let [image, changeImage] = useState(undefined)
+    const [image, changeImage] = useState<any>(undefined)
 
     const updateUsername = (event: any) => {
         event.preventDefault()
@@ -64,7 +64,10 @@ export const EditUserComponent: FunctionComponent<any> = (props) => {
         event.preventDefault()
         changePassword(event.currentTarget.value)
     }
-
+    const updateConfirmPassword = (e:any) => {
+        e.preventDefault()
+        changeConfirmPassword(e.currentTarget.value)
+    }
     const updatefirstName = (e:any) => {
         e.preventDefault()
         changeFirstName(e.currentTarget.value)
@@ -81,7 +84,7 @@ export const EditUserComponent: FunctionComponent<any> = (props) => {
         changeEmail(event.currentTarget.value)
     }
     
-    /*const updateImage = (e: any) => {
+    const updateImage = (e: any) => {
         let file: File = e.currentTarget.files[0]
         let reader = new FileReader()
     
@@ -91,7 +94,7 @@ export const EditUserComponent: FunctionComponent<any> = (props) => {
           console.log(reader.result)
           changeImage(reader.result)
         }
-      }*/
+      }
 
     const updateUser= async (e: SyntheticEvent) => {
         e.preventDefault()
@@ -104,8 +107,8 @@ export const EditUserComponent: FunctionComponent<any> = (props) => {
             firstName, 
             lastName, 
             email,
-            role:'User'
-            //image
+            role:'User',
+            image
         }
         try {
             await projectupdateUser (updatedUser)
@@ -130,10 +133,11 @@ export const EditUserComponent: FunctionComponent<any> = (props) => {
                 <Grid container spacing={5}>
                     <Grid item xs={12} sm={6} md={12} lg={6} className={classes.grid}>
                         <TextField id="username" label="USERNAME" value={username} onChange={updateUsername} />
-                        <TextField id="standard-basic" label="Firstname" value={firstName} onChange={updatefirstName} />
-                        <TextField id="standard-basic" label="Lastname" value={lastName} onChange={updatelastName} />
+                        <TextField id="standard-basic" label="FIRSTNAME" value={firstName} onChange={updatefirstName} />
+                        <TextField id="standard-basic" label="LASTNAME" value={lastName} onChange={updatelastName} />
                         <TextField id="password" type='password' label="PASSWORD" value={password} onChange={updatePassword} /> 
-                        <TextField id="password" type='email' label="email" value={email} onChange={updateEmail} />   
+                        <TextField id="standard-basic" type='password' label="CONFIRM PASSWORD" value={confirmPassword} onChange={updateConfirmPassword}/>
+                        <TextField id="password" type='email' label="EMAIL" value={email} onChange={updateEmail} />   
                         <Button className={classes.submit} type='submit' variant="contained" color="secondary">Save Changes</Button>
                     </Grid>
                 </Grid>

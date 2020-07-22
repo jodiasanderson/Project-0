@@ -129,12 +129,12 @@ export const NewUserComponent: FunctionComponent<any> = (props) => {
             <form className={classes.form} autoComplete="off" onSubmit={submitUser}>
                 <Grid container spacing={10}>
                     <Grid item xs={2} sm={6} md={12} lg={4} className={classes.grid}>
-                    <TextField id="standard-basic" label="Username" value={username} onChange={updateUsername} />
-                    <TextField id="standard-basic" type='password' label="password" value={password} onChange={updatePassword}/>
-                    <TextField id="standard-basic" type='password' label="confirm password" value={confirmPassword} onChange={updateConfirmPassword}/>
-                    <TextField id="standard-basic" label="Firstname" value={firstName} onChange={updatefirstName} />
-                    <TextField id="standard-basic" label="Lastname" value={lastName} onChange={updatelastName} />
-                    <TextField id="standard-basic" type='email' label="email" value={email} onChange={updateEmail}/> 
+                    <TextField id="standard-basic" label="USERNAME" value={username} onChange={updateUsername} />
+                    <TextField id="standard-basic" type='password' label="PASSWORD" value={password} onChange={updatePassword}/>
+                    <TextField id="standard-basic" type='password' label="CONFIRM PASSWORD" value={confirmPassword} onChange={updateConfirmPassword}/>
+                    <TextField id="standard-basic" label="FIRSTNAME" value={firstName} onChange={updatefirstName} />
+                    <TextField id="standard-basic" label="LASTNAME" value={lastName} onChange={updatelastName} />
+                    <TextField id="standard-basic" type='email' label="EMAIL" value={email} onChange={updateEmail}/> 
                     <input type='file' name='file' accept='image/*' onChange={updateImage}/>
                     <img src={image}/>
                     <Button className={classes.submit} type='submit' variant="contained" color="secondary">REGISTER</Button>

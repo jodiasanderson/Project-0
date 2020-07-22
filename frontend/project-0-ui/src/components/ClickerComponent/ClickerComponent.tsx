@@ -59,20 +59,17 @@ export const ClickerComponent: FunctionComponent<ICLickerProps> = (props) => {
 
             {/* By taking a value from state and embbeding it into the display we are doing something we call data binding 
             fundamental property of react web design*/}
-            <TitleComponent size='large' title={`Welcome, ${props.user.username} you have ${clicks} number of clicks`} />
+            <TitleComponent size='large' title={`Welcome, ${props.user.username}`} />
             {/* when handling an event we need to provide a callback function, not a function call
             if you weant to call a specific function with a specific value when an event takes place
             wrap that function call in an anonymous function
             changeClicks(2) -- function call
             ()=>(changeClicks(2)) -- this is a fcuntion that calls changeClicks with a specific value */}
            
-            <Button variant="contained" onClick={()=>(changeClicks(clicks + 1))}>{/* this is event binding, we bind an event to a function that manipulates state */}
-            </Button>
             <Container maxWidth="lg" className={classes.container}>
            
                 <Grid container spacing={10}>
                     <Grid item xs={12} sm={6} md={12} lg={4} className={classes.grid}>
-                    <Button className={classes.submit} type='submit' variant="contained" color="secondary" onClick={()=>(changeClicks(clicks + 1))}>CLICK ME</Button>
                     </Grid>
                 </Grid>
 

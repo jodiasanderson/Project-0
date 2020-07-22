@@ -124,14 +124,14 @@ export async function saveOneUser(newUser:User):Promise<User>
         await client.query('BEGIN;')//start transaction
         //let roleId = await client.query(`select r."role_id" from project0.roles r where r."role" = $1`, [newUser.role])
 
-        let roleId = await client.query(`select r."role_id" from project0.roles r where r."role" = $1`, [newUser.role])
-        if(roleId.rowCount === 0){
-            throw new Error('Role Not Found')
-        }
-        roleId = roleId.rows[0].role_id
+        //let roleId = await client.query(`select r."role_id" from project0.roles r where r."role" = $1`, [newUser.role])
+        //if(roleId.rowCount === 0){
+            //throw new Error('Role Not Found')
+        //}
+       //roleId = roleId.rows[0].role_id
         let results = await client.query(`insert into project0.users ("username", "password", "firstName", "lastName", "email","role", "image")
                                             values($1,$2,$3,$4,$5,$6,$7) returning "user_id" `,//returns some values from rows in an insert, update,delete
-                                            [newUser.username, newUser.password, newUser.firstName, newUser.lastName, newUser.email, newUser.image, roleId])
+                                            [newUser.username, newUser.password, newUser.firstName, newUser.lastName, newUser.email, newUser.image, newUser.role])
         newUser.userId = results.rows[0].user_id
         await client.query('COMMIT;')//ends transaction
         return newUser

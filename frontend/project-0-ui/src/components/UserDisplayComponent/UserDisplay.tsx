@@ -60,15 +60,21 @@ export const UserDisplayComponent: FunctionComponent<IUserDisplayProps> = (props
       <Typography className={classes.typography} variant='h6'>
             USERID : {props.user.userId}
           </Typography>
-
           <Typography className={classes.typography} variant='h4'>
             USERNAME : {props.user.username}
+          </Typography>
+          
+          <Typography className={classes.typography} variant='h4'>
+            FIRSTNAME : {props.user.firstName}
+          </Typography>
+          <Typography className={classes.typography} variant='h4'>
+           LASTNAME : {props.user.lastName}
           </Typography>
           <Typography className={classes.typography} variant='h4'>
            EMAIL : {props.user.email}
           </Typography>
           <label htmlFor='file'>Profile Picture: </label>
-                    <input type='file' name='file' accept='image/*' onChange={updateImage}/>
+        <input type='file' name='file' accept='image/*' onChange={updateImage}/>
                     <img src={image}/>
       
         </Paper>

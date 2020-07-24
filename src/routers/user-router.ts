@@ -1,12 +1,12 @@
 import express, { Request, Response, NextFunction } from 'express'
 //import { authenticationMiddleware } from '../middleware/authentication-middleware'
-import {patchUser, deleteUser, saveOneUser } from '../daos/SQL/user-dao'
+import {patchUser, deleteUser } from '../daos/SQL/user-dao'
 //import { authorizationMiddleware } from '../middleware/authorization-middleware'
 //import { UserUserInputError } from '../errors/UserUserInputError'
 import { User } from '../models/User'
 //import { BadCredentialsError } from '../errors/BadCredentialsError'
 import {AuthFailureError} from '../errors/AuthFailureError'
-import { getAllUsersService, getUserByIDService } from '../services/user-service'
+import { getAllUsersService, getUserByIDService, saveOneUserService } from '../services/user-service'
 //saveOneUserService 
 
 //prints from DB
@@ -144,7 +144,7 @@ userRouter.post('/', async (req: Request, res: Response, next: NextFunction) =>
        newUser.email = email || null
        try 
        {
-           let savedUser = await saveOneUser(newUser)
+           let savedUser = await saveOneUserService(newUser)
            res.json(savedUser)
            // needs to have the updated userId
        } 

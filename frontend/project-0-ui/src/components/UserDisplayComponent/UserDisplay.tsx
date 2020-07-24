@@ -38,18 +38,7 @@ const useStyles = makeStyles((theme: Theme) =>
 export const UserDisplayComponent: FunctionComponent<IUserDisplayProps> = (props) => {
   let classes = useStyles()
 
-  const [image, changeImage] = useState<any>(undefined)
-  const updateImage = (e:any) => {
-    let file = e.currentTarget.files[0]
-    let reader = new FileReader()
-    reader.readAsDataURL(file)
-    reader.onload = () => {
-    //reader.result
-        console.log(reader.result)
-        //changeImage(s)
-        changeImage(reader.result)
-    }
-}
+  
 
   return (
     <div className={classes.root}>
@@ -73,9 +62,11 @@ export const UserDisplayComponent: FunctionComponent<IUserDisplayProps> = (props
           <Typography className={classes.typography} variant='h4'>
            EMAIL : {props.user.email}
           </Typography>
+          <Typography className={classes.typography} variant='h4'>
+           IMAGE :   <img src={props.user.image} />
+          </Typography>
           <label htmlFor='file'>Profile Picture: </label>
-        <input type='file' name='file' accept='image/*' onChange={updateImage}/>
-                    <img src={image}/>
+      
       
         </Paper>
     </div >

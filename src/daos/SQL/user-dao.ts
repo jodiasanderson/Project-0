@@ -129,9 +129,10 @@ export async function saveOneUser(newUser:User):Promise<User>
             //throw new Error('Role Not Found')
         //}
        //roleId = roleId.rows[0].role_id
+       let roleId = 3 
         let results = await client.query(`insert into project0.users ("username", "password", "firstName", "lastName", "email","role", "image")
                                             values($1,$2,$3,$4,$5,$6,$7) returning "user_id" `,//returns some values from rows in an insert, update,delete
-                                            [newUser.username, newUser.password, newUser.firstName, newUser.lastName, newUser.email, newUser.image, newUser.role])
+                                            [newUser.username, newUser.password, newUser.firstName, newUser.lastName, newUser.email ,roleId, newUser.image])
         newUser.userId = results.rows[0].user_id
         await client.query('COMMIT;')//ends transaction
         return newUser
